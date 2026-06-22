@@ -2,9 +2,10 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "%extension.description%",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "anita",
   "license": "MIT",
+  "icon": "resources/icon.png",
   "repository": {
     "type": "git",
     "url": "https://git.quanticware.com/anita/vscodium-ssh-explorer.git"
