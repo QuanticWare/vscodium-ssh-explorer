@@ -2,7 +2,7 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "Ouvre l'arborescence d'un serveur distant via SSH/SFTP en se basant sur ~/.ssh/config. Aucun agent à installer côté serveur.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "anita",
   "license": "MIT",
   "repository": {
