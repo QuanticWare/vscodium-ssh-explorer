@@ -1,121 +1,120 @@
+> 🌐 **Language:** **English** · [Français](https://git.quanticware.com/quanticware/vscodium-ssh-explorer/src/branch/main/README.fr.md)
+
 # SSH Explorer (VSCodium)
 
-Ouvre l'**arborescence d'un serveur distant** directement dans l'explorateur de
-VSCodium via **SSH/SFTP**, en se basant sur votre fichier **`~/.ssh/config`**.
-Aucun agent ni serveur à installer côté distant : un simple accès SSH suffit.
+Browse a **remote server's file tree** directly in the VSCodium explorer over
+**SSH/SFTP**, driven by your **`~/.ssh/config`** file. Nothing to install on the
+remote side: plain SSH access is enough.
 
-> Conçue pour **VSCodium**, où l'extension officielle *Remote - SSH* de Microsoft
-> ne fonctionne pas. Compatible VS Code également (API identique).
+> Built for **VSCodium**, where Microsoft's official *Remote - SSH* extension
+> does not work. Also compatible with VS Code (identical API).
 
-## Fonctionnalités
+## Features
 
-- Liste des hôtes lue depuis `~/.ssh/config` (résolution de `HostName`, `User`,
-  `Port`, `IdentityFile`, `ProxyJump`).
-- Montage de l'arborescence distante sous des URI `ssh://<hôte>/<chemin>` via un
-  `FileSystemProvider` SFTP — lecture **et** écriture des fichiers.
-- Authentification : agent SSH (`SSH_AUTH_SOCK`), clé privée (avec invite de
-  passphrase si chiffrée), mot de passe / clavier-interactif.
-- Support d'un saut `ProxyJump` (bastion).
-- Accès **`root`** possible via une clé SSH dédiée à « commande forcée »
-  (voir [Accès « root »](#accès--root--sur-le-serveur-distant-sftp-élevé)).
-- Vue dédiée dans la barre d'activité listant les hôtes configurés.
-- **Multilingue** : interface en **anglais** (langue par défaut) ou en **français**,
-  selon la langue d'affichage de VSCodium (voir [Langues](#langues)).
+- Host list read from `~/.ssh/config` (resolves `HostName`, `User`, `Port`,
+  `IdentityFile`, `ProxyJump`).
+- Remote tree mounted under `ssh://<host>/<path>` URIs via an SFTP
+  `FileSystemProvider` — **read and write** files.
+- Authentication: SSH agent (`SSH_AUTH_SOCK`), private key (with passphrase
+  prompt if encrypted), password / keyboard-interactive.
+- Single `ProxyJump` hop (bastion) supported.
+- **`root`** access possible through a dedicated "forced-command" SSH key
+  (see [Root access](#root-access-on-the-remote-server-elevated-sftp)).
+- Dedicated Activity Bar view listing the configured hosts.
+- **Multilingual**: interface in **English** (default language) or **French**,
+  following VSCodium's display language (see [Languages](#languages)).
 
-## Utilisation
+## Usage
 
-1. Ouvrir la palette de commandes (`Ctrl/Cmd+Shift+P`).
-2. Lancer **« SSH Explorer: Se connecter à un hôte »**.
-3. Choisir un hôte de votre `~/.ssh/config`, puis le **point de départ** :
-   - **Dossier personnel** (`~`),
-   - **Racine du serveur** (`/`) — pour parcourir *toute* l'arborescence,
-   - **Chemin personnalisé…**.
+1. Open the Command Palette (`Ctrl/Cmd+Shift+P`).
+2. Run **"SSH Explorer: Connect to Host"**.
+3. Pick a host from your `~/.ssh/config`, then the **starting point**:
+   - **Home folder** (`~`),
+   - **Server root** (`/`) — to browse the *whole* tree,
+   - **Custom path…**.
 
-L'arborescence apparaît comme un dossier du workspace ; ouvrez/modifiez/créez vos
-fichiers normalement.
+The tree shows up as a workspace folder; open/edit/create your files as usual.
 
-### Parcourir tout le serveur
+### Browsing the whole server
 
-VS Code/VSCodium ne permet pas de remonter au-dessus de la racine d'un dossier de
-workspace. Pour explorer l'ensemble du serveur :
+VS Code/VSCodium does not let you go above the root of a workspace folder. To
+explore the entire server:
 
-- ouvrez directement la **Racine du serveur (`/`)** à la connexion, **ou**
-- faites un **clic droit** sur un dossier distant → **« SSH Explorer: Remonter au
-  dossier parent »** pour ajouter son dossier parent.
+- open the **Server root (`/`)** directly on connect, **or**
+- **right-click** a remote folder → **"SSH Explorer: Open Parent Folder"** to add
+  its parent folder.
 
-## Accès « root » sur le serveur distant (SFTP élevé)
+## Root access on the remote server (elevated SFTP)
 
-SFTP s'exécute **toujours avec les droits de l'utilisateur qui se connecte**. Le
-sous-système SFTP standard d'OpenSSH ne sait pas faire de `sudo` : avec un compte
-non privilégié, vous ne pouvez ni lire ni écrire les fichiers appartenant à
-`root`. L'élévation se règle donc **au niveau de la connexion SSH**, pas dans
-l'extension.
+SFTP **always runs with the privileges of the connecting user**. OpenSSH's
+standard SFTP subsystem cannot `sudo`: with an unprivileged account you can
+neither read nor write files owned by `root`. Elevation is therefore handled
+**at the SSH connection level**, not inside the extension.
 
-La méthode recommandée (propre, réversible, sans modifier `sshd_config` ni le
-code de l'extension) : une **clé SSH dédiée à « commande forcée »**. Elle suppose
-que votre utilisateur dispose de `sudo` (idéalement `NOPASSWD`) pour lancer
-`sftp-server`.
+The recommended approach (clean, reversible, without touching `sshd_config` or
+the extension's code): a **dedicated "forced-command" SSH key**. It assumes your
+user has `sudo` (ideally `NOPASSWD`) to launch `sftp-server`.
 
-### 1. Générer une clé dédiée (sans passphrase)
+### 1. Generate a dedicated key (no passphrase)
 
 ```bash
-ssh-keygen -t ed25519 -N "" -C "monhote-root-sftp" \
-  -f ~/.ssh/monhote_root_sftp_ed25519
+ssh-keygen -t ed25519 -N "" -C "myhost-root-sftp" \
+  -f ~/.ssh/myhost_root_sftp_ed25519
 ```
 
-### 2. Installer la commande forcée côté serveur
+### 2. Install the forced command on the server
 
-Dans le `~/.ssh/authorized_keys` de **votre** compte sur le serveur, ajoutez la
-clé publique précédée des options qui forcent un `sftp-server` élevé et
-n'autorisent **que** ça :
+In **your** account's `~/.ssh/authorized_keys` on the server, add the public key
+prefixed with the options that force an elevated `sftp-server` and allow **only**
+that:
 
 ```
-restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  monhote-root-sftp
+restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  myhost-root-sftp
 ```
 
-- `command="sudo /usr/lib/openssh/sftp-server"` → toute connexion via **cette**
-  clé lance le SFTP en `root` ;
-- `restrict` → ni shell, ni pty, ni tunnel : cette clé ne sert qu'au SFTP élevé ;
-- le chemin de `sftp-server` varie selon la distribution
-  (`/usr/lib/openssh/sftp-server` sur Debian/Ubuntu,
-  `/usr/libexec/openssh/sftp-server` sur RHEL/Fedora) ;
-- vos autres clés (connexion normale) ne sont **pas** affectées.
+- `command="sudo /usr/lib/openssh/sftp-server"` → any connection using **this**
+  key launches SFTP as `root`;
+- `restrict` → no shell, pty, or tunnel: this key is for elevated SFTP only;
+- the `sftp-server` path varies by distribution
+  (`/usr/lib/openssh/sftp-server` on Debian/Ubuntu,
+  `/usr/libexec/openssh/sftp-server` on RHEL/Fedora);
+- your other keys (normal login) are **not** affected.
 
-> Prérequis sudo : `votreuser ALL=(ALL) NOPASSWD: /usr/lib/openssh/sftp-server`
-> (ou `NOPASSWD: ALL`). Vérifiez avec `sudo -n -l`.
+> sudo prerequisite: `youruser ALL=(ALL) NOPASSWD: /usr/lib/openssh/sftp-server`
+> (or `NOPASSWD: ALL`). Check with `sudo -n -l`.
 
-### 3. Déclarer un alias dédié dans `~/.ssh/config`
+### 3. Declare a dedicated alias in `~/.ssh/config`
 
-Convention de nommage : suffixer l'hôte d'origine par **`-sftp`**. Placez ce bloc
-**avant** tout bloc générique `Host *` qui imposerait une autre `IdentityFile`,
-sinon la clé du `Host *` serait proposée en premier et la commande forcée ne
-s'appliquerait pas.
+Naming convention: suffix the original host with **`-sftp`**. Place this block
+**before** any generic `Host *` block that would impose another `IdentityFile`,
+otherwise the `Host *` key would be offered first and the forced command would
+not apply.
 
 ```sshconfig
-# À placer en haut du fichier, avant "Host *"
-Host monhote.example.com-sftp
-  Hostname monhote.example.com
-  User votreuser
+# Put it at the top of the file, before "Host *"
+Host myhost.example.com-sftp
+  Hostname myhost.example.com
+  User youruser
   Port 22
-  IdentityFile ~/.ssh/monhote_root_sftp_ed25519
+  IdentityFile ~/.ssh/myhost_root_sftp_ed25519
   IdentitiesOnly yes
   IdentityAgent none
   PreferredAuthentications publickey
 ```
 
-`IdentitiesOnly yes` + `IdentityAgent none` garantissent que **seule** la clé
-dédiée est présentée (l'agent SSH ne glisse pas une autre clé en premier).
+`IdentitiesOnly yes` + `IdentityAgent none` guarantee that **only** the dedicated
+key is presented (the SSH agent won't slip another key in first).
 
-### 4. Utiliser dans l'extension
+### 4. Use it in the extension
 
-1. **SSH Explorer: Se connecter à un hôte** → choisir **`monhote.example.com-sftp`**.
-2. Point de départ : **Racine du serveur (`/`)**.
-3. Vous parcourez et éditez désormais **tout** le système de fichiers en `root`.
+1. **SSH Explorer: Connect to Host** → pick **`myhost.example.com-sftp`**.
+2. Starting point: **Server root (`/`)**.
+3. You now browse and edit the **whole** filesystem as `root`.
 
-### Exemple réel (hôte `myhost.example.com`)
+### Real-world example (host `myhost.example.com`)
 
 ```sshconfig
-# Connexion interactive habituelle (non privilégiée)
+# Usual interactive (unprivileged) login
 Host myhost.example.com
   Hostname 203.0.113.10
   User youruser
@@ -124,7 +123,7 @@ Host myhost.example.com
   RemoteCommand sudo -s
   RequestTTY yes
 
-# Accès SFTP élevé (root) — à placer AVANT "Host *"
+# Elevated (root) SFTP access — put BEFORE "Host *"
 Host myhost.example.com-sftp
   Hostname 203.0.113.10
   User youruser
@@ -135,81 +134,77 @@ Host myhost.example.com-sftp
   PreferredAuthentications publickey
 ```
 
-Entrée correspondante dans le `~/.ssh/authorized_keys` de `youruser` sur myhost :
+Matching entry in `youruser`'s `~/.ssh/authorized_keys` on myhost:
 
 ```
 restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  myhost-root-sftp
 ```
 
-Dans l'extension, connectez-vous à **`myhost.example.com-sftp`**, démarrez sur
-`/`, et vous éditez les fichiers de `root` (ex. `/etc/...`).
+In the extension, connect to **`myhost.example.com-sftp`**, start at `/`, and
+you edit `root`'s files (e.g. `/etc/...`).
 
-> 🚀 **Déploiement de flotte** : pour poser cette entrée `authorized_keys` (et la
-> règle sudoers associée) sur tous les VPS d'un coup, un playbook Ansible est
-> fourni dans `<your-ops-repo>/playbook/sftp_root_access.yml`
-> (idempotent, mode `--check` pour simuler, `-e sftp_root_state=absent` pour
-> révoquer).
+> 🚀 **Fleet deployment**: to push this `authorized_keys` entry (and the matching
+> sudoers rule) to all your VPS at once, an Ansible playbook is provided in
+> `<your-ops-repo>/playbook/sftp_root_access.yml` (idempotent, `--check`
+> mode to simulate, `-e sftp_root_state=absent` to revoke).
 
-### Révoquer l'accès
+### Revoking access
 
-Supprimez simplement la ligne correspondante dans le `~/.ssh/authorized_keys`
-distant (et, au besoin, la clé locale + l'alias). L'accès root disparaît
-immédiatement.
+Just remove the corresponding line from the remote `~/.ssh/authorized_keys` (and,
+if needed, the local key + alias). Root access disappears immediately.
 
-> ⚠️ Cette clé ouvre un accès `root` en lecture/écriture au serveur : protégez le
-> fichier `~/.ssh/<clé>` comme un secret et ne le copiez pas sur des machines non
-> fiables.
+> ⚠️ This key grants read/write `root` access to the server: protect the
+> `~/.ssh/<key>` file like a secret and do not copy it to untrusted machines.
 
-## Paramètres
+## Settings
 
-| Paramètre | Défaut | Description |
-|-----------|--------|-------------|
-| `sshExplorer.configPath` | `~/.ssh/config` | Fichier de config SSH à analyser |
-| `sshExplorer.defaultRemotePath` | `.` | Dossier distant ouvert par défaut |
-| `sshExplorer.connectTimeout` | `20000` | Timeout de connexion (ms) |
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `sshExplorer.configPath` | `~/.ssh/config` | SSH config file to parse |
+| `sshExplorer.defaultRemotePath` | `.` | Remote folder opened by default |
+| `sshExplorer.connectTimeout` | `20000` | Connection timeout (ms) |
 | `sshExplorer.keepaliveInterval` | `15000` | Keepalive (ms, 0 = off) |
-| `sshExplorer.statCacheTtl` | `3000` | Cache des `stat` (ms, 0 = off) |
+| `sshExplorer.statCacheTtl` | `3000` | `stat` cache (ms, 0 = off) |
 
-## Langues
+## Languages
 
-L'extension est **bilingue anglais / français**. La langue suivie est celle de
-**l'interface de VSCodium** (commande *« Configure Display Language »* /
-*« Configurer la langue d'affichage »*) :
+The extension is **bilingual English / French**. The language it follows is
+**VSCodium's UI language** (*"Configure Display Language"* command):
 
-- **anglais** = langue de base (et repli pour toute autre locale) ;
-- **français** = traduction complète des commandes, réglages et messages.
+- **English** = base language (and fallback for any other locale);
+- **French** = full translation of commands, settings and messages.
 
-Concrètement :
+In practice:
 
-- les libellés du manifeste (titres de commandes, descriptions des réglages) sont
-  localisés via `package.nls.json` (anglais) et `package.nls.fr.json` (français) ;
-- les messages du code (invites, erreurs, sélecteurs) passent par l'API native
-  `vscode.l10n` ; les traductions vivent dans `l10n/bundle.l10n.fr.json`.
+- manifest labels (command titles, setting descriptions) are localized via
+  `package.nls.json` (English) and `package.nls.fr.json` (French);
+- code messages (prompts, errors, pickers) go through the native `vscode.l10n`
+  API; the translations live in `l10n/bundle.l10n.fr.json`.
 
-### Ajouter une langue
+### Adding a language
 
-1. Dupliquer `package.nls.json` en `package.nls.<locale>.json` (ex. `de`, `es`)
-   et traduire les valeurs.
-2. Dupliquer `l10n/bundle.l10n.fr.json` en `l10n/bundle.l10n.<locale>.json` en
-   conservant les **clés anglaises** et en traduisant les valeurs.
-3. Reconstruire et repackager (`npm run package`).
+1. Duplicate `package.nls.json` to `package.nls.<locale>.json` (e.g. `de`, `es`)
+   and translate the values.
+2. Duplicate `l10n/bundle.l10n.fr.json` to `l10n/bundle.l10n.<locale>.json`,
+   keeping the **English keys** and translating the values.
+3. Rebuild and repackage (`npm run package`).
 
-## Développement
+## Development
 
 ```bash
 npm install
-npm run compile        # bundle esbuild -> dist/extension.js
-# F5 dans VSCodium pour lancer un Extension Development Host
-npm run package        # génère le .vsix
+npm run compile        # esbuild bundle -> dist/extension.js
+# F5 in VSCodium to launch an Extension Development Host
+npm run package        # builds the .vsix
 ```
 
-## Limites (MVP)
+## Limitations (MVP)
 
-- Pas d'exécution distante d'extensions ni de terminal distant (approche
-  « FileSystemProvider », pas « Remote Server »).
-- Pas de surveillance temps réel des fichiers (`watch` no-op).
-- Un seul niveau de `ProxyJump`.
+- No remote extension execution or remote terminal ("FileSystemProvider"
+  approach, not "Remote Server").
+- No real-time file watching (`watch` is a no-op).
+- Single `ProxyJump` level.
 
-## Licence
+## License
 
 MIT
