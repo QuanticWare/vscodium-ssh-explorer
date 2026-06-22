@@ -2,8 +2,9 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "%extension.description%",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "publisher": "anita",
+  "author": "Fred_GB",
   "license": "MIT",
   "icon": "resources/icon.png",
   "repository": {
