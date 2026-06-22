@@ -16,6 +16,8 @@ Aucun agent ni serveur à installer côté distant : un simple accès SSH suffit
 - Authentification : agent SSH (`SSH_AUTH_SOCK`), clé privée (avec invite de
   passphrase si chiffrée), mot de passe / clavier-interactif.
 - Support d'un saut `ProxyJump` (bastion).
+- Accès **`root`** possible via une clé SSH dédiée à « commande forcée »
+  (voir [Accès « root »](#accès--root--sur-le-serveur-distant-sftp-élevé)).
 - Vue dédiée dans la barre d'activité listant les hôtes configurés.
 
 ## Utilisation
@@ -38,6 +40,117 @@ workspace. Pour explorer l'ensemble du serveur :
 - ouvrez directement la **Racine du serveur (`/`)** à la connexion, **ou**
 - faites un **clic droit** sur un dossier distant → **« SSH Explorer: Remonter au
   dossier parent »** pour ajouter son dossier parent.
+
+## Accès « root » sur le serveur distant (SFTP élevé)
+
+SFTP s'exécute **toujours avec les droits de l'utilisateur qui se connecte**. Le
+sous-système SFTP standard d'OpenSSH ne sait pas faire de `sudo` : avec un compte
+non privilégié, vous ne pouvez ni lire ni écrire les fichiers appartenant à
+`root`. L'élévation se règle donc **au niveau de la connexion SSH**, pas dans
+l'extension.
+
+La méthode recommandée (propre, réversible, sans modifier `sshd_config` ni le
+code de l'extension) : une **clé SSH dédiée à « commande forcée »**. Elle suppose
+que votre utilisateur dispose de `sudo` (idéalement `NOPASSWD`) pour lancer
+`sftp-server`.
+
+### 1. Générer une clé dédiée (sans passphrase)
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "monhote-root-sftp" \
+  -f ~/.ssh/monhote_root_sftp_ed25519
+```
+
+### 2. Installer la commande forcée côté serveur
+
+Dans le `~/.ssh/authorized_keys` de **votre** compte sur le serveur, ajoutez la
+clé publique précédée des options qui forcent un `sftp-server` élevé et
+n'autorisent **que** ça :
+
+```
+restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  monhote-root-sftp
+```
+
+- `command="sudo /usr/lib/openssh/sftp-server"` → toute connexion via **cette**
+  clé lance le SFTP en `root` ;
+- `restrict` → ni shell, ni pty, ni tunnel : cette clé ne sert qu'au SFTP élevé ;
+- le chemin de `sftp-server` varie selon la distribution
+  (`/usr/lib/openssh/sftp-server` sur Debian/Ubuntu,
+  `/usr/libexec/openssh/sftp-server` sur RHEL/Fedora) ;
+- vos autres clés (connexion normale) ne sont **pas** affectées.
+
+> Prérequis sudo : `votreuser ALL=(ALL) NOPASSWD: /usr/lib/openssh/sftp-server`
+> (ou `NOPASSWD: ALL`). Vérifiez avec `sudo -n -l`.
+
+### 3. Déclarer un alias dédié dans `~/.ssh/config`
+
+Convention de nommage : suffixer l'hôte d'origine par **`-sftp`**. Placez ce bloc
+**avant** tout bloc générique `Host *` qui imposerait une autre `IdentityFile`,
+sinon la clé du `Host *` serait proposée en premier et la commande forcée ne
+s'appliquerait pas.
+
+```sshconfig
+# À placer en haut du fichier, avant "Host *"
+Host monhote.example.com-sftp
+  Hostname monhote.example.com
+  User votreuser
+  Port 22
+  IdentityFile ~/.ssh/monhote_root_sftp_ed25519
+  IdentitiesOnly yes
+  IdentityAgent none
+  PreferredAuthentications publickey
+```
+
+`IdentitiesOnly yes` + `IdentityAgent none` garantissent que **seule** la clé
+dédiée est présentée (l'agent SSH ne glisse pas une autre clé en premier).
+
+### 4. Utiliser dans l'extension
+
+1. **SSH Explorer: Se connecter à un hôte** → choisir **`monhote.example.com-sftp`**.
+2. Point de départ : **Racine du serveur (`/`)**.
+3. Vous parcourez et éditez désormais **tout** le système de fichiers en `root`.
+
+### Exemple réel (hôte `myhost.example.com`)
+
+```sshconfig
+# Connexion interactive habituelle (non privilégiée)
+Host myhost.example.com
+  Hostname 203.0.113.10
+  User youruser
+  Port 22
+  IdentityFile ~/.ssh/myhost_ed25519
+  RemoteCommand sudo -s
+  RequestTTY yes
+
+# Accès SFTP élevé (root) — à placer AVANT "Host *"
+Host myhost.example.com-sftp
+  Hostname 203.0.113.10
+  User youruser
+  Port 22
+  IdentityFile ~/.ssh/myhost_root_sftp_ed25519
+  IdentitiesOnly yes
+  IdentityAgent none
+  PreferredAuthentications publickey
+```
+
+Entrée correspondante dans le `~/.ssh/authorized_keys` de `youruser` sur myhost :
+
+```
+restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  myhost-root-sftp
+```
+
+Dans l'extension, connectez-vous à **`myhost.example.com-sftp`**, démarrez sur
+`/`, et vous éditez les fichiers de `root` (ex. `/etc/...`).
+
+### Révoquer l'accès
+
+Supprimez simplement la ligne correspondante dans le `~/.ssh/authorized_keys`
+distant (et, au besoin, la clé locale + l'alias). L'accès root disparaît
+immédiatement.
+
+> ⚠️ Cette clé ouvre un accès `root` en lecture/écriture au serveur : protégez le
+> fichier `~/.ssh/<clé>` comme un secret et ne le copiez pas sur des machines non
+> fiables.
 
 ## Paramètres
 
