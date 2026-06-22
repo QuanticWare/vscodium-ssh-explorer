@@ -142,6 +142,12 @@ restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  myhost
 Dans l'extension, connectez-vous à **`myhost.example.com-sftp`**, démarrez sur
 `/`, et vous éditez les fichiers de `root` (ex. `/etc/...`).
 
+> 🚀 **Déploiement de flotte** : pour poser cette entrée `authorized_keys` (et la
+> règle sudoers associée) sur tous les VPS d'un coup, un playbook Ansible est
+> fourni dans `<your-ops-repo>/playbook/sftp_root_access.yml`
+> (idempotent, mode `--check` pour simuler, `-e sftp_root_state=absent` pour
+> révoquer).
+
 ### Révoquer l'accès
 
 Supprimez simplement la ligne correspondante dans le `~/.ssh/authorized_keys`
