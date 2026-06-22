@@ -1,0 +1,20 @@
+{
+  "SSH Explorer: no host found in {0}.": "SSH Explorer : aucun hôte trouvé dans {0}.",
+  "Pick an SSH host to open": "Choisir un hôte SSH à ouvrir",
+  "Connecting to {0}…": "Connexion à {0}…",
+  "SSH Explorer: cannot connect to {0} — {1}": "SSH Explorer : connexion à {0} impossible — {1}",
+  "SSH Explorer: no remote folder open.": "SSH Explorer : aucun dossier distant ouvert.",
+  "Remote folder to close": "Dossier distant à fermer",
+  "Remote folder whose parent to open": "Dossier distant dont ouvrir le parent",
+  "SSH Explorer: {0} is already at the root (/).": "SSH Explorer : {0} est déjà à la racine (/).",
+  "$(home) Home folder": "$(home) Dossier personnel",
+  "$(folder-library) Server root": "$(folder-library) Racine du serveur",
+  "$(edit) Custom path…": "$(edit) Chemin personnalisé…",
+  "Which folder to open on {0}?": "Quel dossier ouvrir sur {0} ?",
+  "Remote folder to open on {0}": "Dossier distant à ouvrir sur {0}",
+  "SSH Explorer: {0} is already open.": "SSH Explorer : {0} est déjà ouvert.",
+  "SSH password for {0}@{1}": "Mot de passe SSH pour {0}@{1}",
+  "Passphrase for key {0}": "Passphrase pour la clé {0}",
+  "Connect": "Se connecter",
+  "SSH Explorer: cannot read configuration — {0}": "SSH Explorer : lecture de la configuration impossible — {0}"
+}

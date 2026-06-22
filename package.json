@@ -1,7 +1,7 @@
 {
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
-  "description": "Ouvre l'arborescence d'un serveur distant via SSH/SFTP en se basant sur ~/.ssh/config. Aucun agent à installer côté serveur.",
+  "description": "%extension.description%",
   "version": "0.2.1",
   "publisher": "anita",
   "license": "MIT",
@@ -23,6 +23,7 @@
     "explorer"
   ],
   "main": "./dist/extension.js",
+  "l10n": "./l10n",
   "activationEvents": [
     "onFileSystem:ssh"
   ],
@@ -30,27 +31,27 @@
     "commands": [
       {
         "command": "sshExplorer.connect",
-        "title": "SSH Explorer: Se connecter à un hôte",
+        "title": "%command.connect.title%",
         "icon": "$(plug)"
       },
       {
         "command": "sshExplorer.openFolder",
-        "title": "SSH Explorer: Ouvrir un dossier distant",
+        "title": "%command.openFolder.title%",
         "icon": "$(folder-opened)"
       },
       {
         "command": "sshExplorer.openParent",
-        "title": "SSH Explorer: Remonter au dossier parent",
+        "title": "%command.openParent.title%",
         "icon": "$(arrow-up)"
       },
       {
         "command": "sshExplorer.disconnect",
-        "title": "SSH Explorer: Déconnecter",
+        "title": "%command.disconnect.title%",
         "icon": "$(debug-disconnect)"
       },
       {
         "command": "sshExplorer.refreshHosts",
-        "title": "SSH Explorer: Rafraîchir la liste des hôtes",
+        "title": "%command.refreshHosts.title%",
         "icon": "$(refresh)"
       }
     ],
@@ -67,7 +68,7 @@
       "sshExplorer": [
         {
           "id": "sshExplorerHosts",
-          "name": "Hôtes SSH",
+          "name": "%view.hosts.name%",
           "icon": "resources/ssh.svg"
         }
       ]
@@ -106,27 +107,27 @@
         "sshExplorer.configPath": {
           "type": "string",
           "default": "~/.ssh/config",
-          "description": "Chemin du fichier de configuration SSH à analyser pour proposer les hôtes."
+          "description": "%config.configPath.description%"
         },
         "sshExplorer.defaultRemotePath": {
           "type": "string",
           "default": ".",
-          "description": "Dossier distant ouvert par défaut lors de la connexion (\".\" = répertoire personnel de l'utilisateur distant)."
+          "description": "%config.defaultRemotePath.description%"
         },
         "sshExplorer.connectTimeout": {
           "type": "number",
           "default": 20000,
-          "description": "Délai maximal d'établissement d'une connexion SSH (ms)."
+          "description": "%config.connectTimeout.description%"
         },
         "sshExplorer.keepaliveInterval": {
           "type": "number",
           "default": 15000,
-          "description": "Intervalle d'envoi de paquets keepalive pour maintenir la connexion (ms, 0 pour désactiver)."
+          "description": "%config.keepaliveInterval.description%"
         },
         "sshExplorer.statCacheTtl": {
           "type": "number",
           "default": 3000,
-          "description": "Durée de mise en cache des métadonnées de fichiers (stat) pour limiter les allers-retours réseau (ms, 0 pour désactiver)."
+          "description": "%config.statCacheTtl.description%"
         }
       }
     }

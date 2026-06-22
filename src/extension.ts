@@ -95,7 +95,7 @@ async function connectCommand(
     const hosts = listHosts(settings.configPath);
     if (hosts.length === 0) {
       vscode.window.showWarningMessage(
-        `SSH Explorer: aucun hôte trouvé dans ${settings.configPath}.`
+        vscode.l10n.t("SSH Explorer: no host found in {0}.", settings.configPath)
       );
       return;
     }
@@ -106,7 +106,7 @@ async function connectCommand(
         detail: h.proxyJump ? `via ${h.proxyJump}` : undefined,
         alias: h.alias,
       })),
-      { placeHolder: "Choisir un hôte SSH à ouvrir", matchOnDescription: true }
+      { placeHolder: vscode.l10n.t("Pick an SSH host to open"), matchOnDescription: true }
     );
     if (!pick) {
       return;
@@ -123,7 +123,10 @@ async function connectCommand(
   }
 
   await vscode.window.withProgress(
-    { location: vscode.ProgressLocation.Notification, title: `Connexion à ${target}…` },
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: vscode.l10n.t("Connecting to {0}…", target!),
+    },
     async () => {
       try {
         const sftp = await manager.getSftp(target!);
@@ -131,7 +134,11 @@ async function connectCommand(
         addWorkspaceFolder(target!, absolute);
       } catch (err: any) {
         vscode.window.showErrorMessage(
-          `SSH Explorer: connexion à ${target} impossible — ${err?.message ?? err}`
+          vscode.l10n.t(
+            "SSH Explorer: cannot connect to {0} — {1}",
+            target!,
+            String(err?.message ?? err)
+          )
         );
       }
     }
@@ -144,12 +151,14 @@ async function disconnectCommand(manager: ConnectionManager): Promise<void> {
     (f) => f.uri.scheme === SCHEME
   );
   if (folders.length === 0) {
-    vscode.window.showInformationMessage("SSH Explorer: aucun dossier distant ouvert.");
+    vscode.window.showInformationMessage(
+      vscode.l10n.t("SSH Explorer: no remote folder open.")
+    );
     return;
   }
   const pick = await vscode.window.showQuickPick(
     folders.map((f) => ({ label: f.name, description: f.uri.toString(), folder: f })),
-    { placeHolder: "Dossier distant à fermer" }
+    { placeHolder: vscode.l10n.t("Remote folder to close") }
   );
   if (!pick) {
     return;
@@ -171,12 +180,14 @@ async function openParentCommand(uri?: vscode.Uri): Promise<void> {
       (f) => f.uri.scheme === SCHEME
     );
     if (folders.length === 0) {
-      vscode.window.showInformationMessage("SSH Explorer: aucun dossier distant ouvert.");
+      vscode.window.showInformationMessage(
+      vscode.l10n.t("SSH Explorer: no remote folder open.")
+    );
       return;
     }
     const pick = await vscode.window.showQuickPick(
       folders.map((f) => ({ label: f.name, description: f.uri.toString(), uri: f.uri })),
-      { placeHolder: "Dossier distant dont ouvrir le parent" }
+      { placeHolder: vscode.l10n.t("Remote folder whose parent to open") }
     );
     if (!pick) {
       return;
@@ -187,7 +198,7 @@ async function openParentCommand(uri?: vscode.Uri): Promise<void> {
   const parent = parentOf(folderUri.path);
   if (parent === folderUri.path) {
     vscode.window.showInformationMessage(
-      `SSH Explorer: ${folderUri.authority} est déjà à la racine (/).`
+      vscode.l10n.t("SSH Explorer: {0} is already at the root (/).", folderUri.authority)
     );
     return;
   }
@@ -207,11 +218,15 @@ async function pickStartPath(
   const CUSTOM = "__custom__";
   const choice = await vscode.window.showQuickPick(
     [
-      { label: "$(home) Dossier personnel", description: homePath, value: homePath },
-      { label: "$(folder-library) Racine du serveur", description: "/", value: "/" },
-      { label: "$(edit) Chemin personnalisé…", description: "", value: CUSTOM },
+      {
+        label: vscode.l10n.t("$(home) Home folder"),
+        description: homePath,
+        value: homePath,
+      },
+      { label: vscode.l10n.t("$(folder-library) Server root"), description: "/", value: "/" },
+      { label: vscode.l10n.t("$(edit) Custom path…"), description: "", value: CUSTOM },
     ],
-    { placeHolder: `Quel dossier ouvrir sur ${alias} ?` }
+    { placeHolder: vscode.l10n.t("Which folder to open on {0}?", alias) }
   );
   if (!choice) {
     return undefined;
@@ -228,7 +243,7 @@ async function promptRemotePath(
   defaultPath: string
 ): Promise<string | undefined> {
   return vscode.window.showInputBox({
-    prompt: `Dossier distant à ouvrir sur ${alias}`,
+    prompt: vscode.l10n.t("Remote folder to open on {0}", alias),
     value: defaultPath,
     ignoreFocusOut: true,
   });
@@ -262,7 +277,9 @@ function addWorkspaceFolder(alias: string, absolutePath: string): void {
   const uri = vscode.Uri.from({ scheme: SCHEME, authority: alias, path: absolutePath });
   const existing = vscode.workspace.workspaceFolders ?? [];
   if (existing.some((f) => f.uri.toString() === uri.toString())) {
-    vscode.window.showInformationMessage(`SSH Explorer: ${alias} est déjà ouvert.`);
+    vscode.window.showInformationMessage(
+      vscode.l10n.t("SSH Explorer: {0} is already open.", alias)
+    );
     return;
   }
   const name = `SSH ${alias}${absolutePath === "/" ? "" : " " + absolutePath}`;

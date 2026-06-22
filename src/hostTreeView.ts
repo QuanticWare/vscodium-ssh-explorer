@@ -15,7 +15,7 @@ export class HostTreeItem extends vscode.TreeItem {
     this.contextValue = "sshHost";
     this.command = {
       command: "sshExplorer.connect",
-      title: "Se connecter",
+      title: vscode.l10n.t("Connect"),
       arguments: [host.alias],
     };
   }
@@ -40,7 +40,10 @@ export class HostTreeProvider implements vscode.TreeDataProvider<HostTreeItem> {
       return listHosts(this.getConfigPath()).map((h) => new HostTreeItem(h));
     } catch (err: any) {
       vscode.window.showErrorMessage(
-        `SSH Explorer: lecture de la configuration impossible — ${err?.message ?? err}`
+        vscode.l10n.t(
+          "SSH Explorer: cannot read configuration — {0}",
+          String(err?.message ?? err)
+        )
       );
       return [];
     }

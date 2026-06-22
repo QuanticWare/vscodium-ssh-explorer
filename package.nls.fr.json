@@ -1,0 +1,14 @@
+{
+  "extension.description": "Ouvre l'arborescence d'un serveur distant via SSH/SFTP en se basant sur ~/.ssh/config. Aucun agent à installer côté serveur.",
+  "command.connect.title": "SSH Explorer : Se connecter à un hôte",
+  "command.openFolder.title": "SSH Explorer : Ouvrir un dossier distant",
+  "command.openParent.title": "SSH Explorer : Remonter au dossier parent",
+  "command.disconnect.title": "SSH Explorer : Déconnecter",
+  "command.refreshHosts.title": "SSH Explorer : Rafraîchir la liste des hôtes",
+  "view.hosts.name": "Hôtes SSH",
+  "config.configPath.description": "Chemin du fichier de configuration SSH à analyser pour proposer les hôtes.",
+  "config.defaultRemotePath.description": "Dossier distant ouvert par défaut lors de la connexion (\".\" = répertoire personnel de l'utilisateur distant).",
+  "config.connectTimeout.description": "Délai maximal d'établissement d'une connexion SSH (ms).",
+  "config.keepaliveInterval.description": "Intervalle d'envoi de paquets keepalive pour maintenir la connexion (ms, 0 pour désactiver).",
+  "config.statCacheTtl.description": "Durée de mise en cache des métadonnées de fichiers (stat) pour limiter les allers-retours réseau (ms, 0 pour désactiver)."
+}

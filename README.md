@@ -19,6 +19,8 @@ Aucun agent ni serveur à installer côté distant : un simple accès SSH suffit
 - Accès **`root`** possible via une clé SSH dédiée à « commande forcée »
   (voir [Accès « root »](#accès--root--sur-le-serveur-distant-sftp-élevé)).
 - Vue dédiée dans la barre d'activité listant les hôtes configurés.
+- **Multilingue** : interface en **anglais** (langue par défaut) ou en **français**,
+  selon la langue d'affichage de VSCodium (voir [Langues](#langues)).
 
 ## Utilisation
 
@@ -167,6 +169,30 @@ immédiatement.
 | `sshExplorer.connectTimeout` | `20000` | Timeout de connexion (ms) |
 | `sshExplorer.keepaliveInterval` | `15000` | Keepalive (ms, 0 = off) |
 | `sshExplorer.statCacheTtl` | `3000` | Cache des `stat` (ms, 0 = off) |
+
+## Langues
+
+L'extension est **bilingue anglais / français**. La langue suivie est celle de
+**l'interface de VSCodium** (commande *« Configure Display Language »* /
+*« Configurer la langue d'affichage »*) :
+
+- **anglais** = langue de base (et repli pour toute autre locale) ;
+- **français** = traduction complète des commandes, réglages et messages.
+
+Concrètement :
+
+- les libellés du manifeste (titres de commandes, descriptions des réglages) sont
+  localisés via `package.nls.json` (anglais) et `package.nls.fr.json` (français) ;
+- les messages du code (invites, erreurs, sélecteurs) passent par l'API native
+  `vscode.l10n` ; les traductions vivent dans `l10n/bundle.l10n.fr.json`.
+
+### Ajouter une langue
+
+1. Dupliquer `package.nls.json` en `package.nls.<locale>.json` (ex. `de`, `es`)
+   et traduire les valeurs.
+2. Dupliquer `l10n/bundle.l10n.fr.json` en `l10n/bundle.l10n.<locale>.json` en
+   conservant les **clés anglaises** et en traduisant les valeurs.
+3. Reconstruire et repackager (`npm run package`).
 
 ## Développement
 

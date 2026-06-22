@@ -1,0 +1,14 @@
+{
+  "extension.description": "Browse a remote server's file tree over SSH/SFTP based on ~/.ssh/config. No agent to install on the server.",
+  "command.connect.title": "SSH Explorer: Connect to Host",
+  "command.openFolder.title": "SSH Explorer: Open Remote Folder",
+  "command.openParent.title": "SSH Explorer: Open Parent Folder",
+  "command.disconnect.title": "SSH Explorer: Disconnect",
+  "command.refreshHosts.title": "SSH Explorer: Refresh Host List",
+  "view.hosts.name": "SSH Hosts",
+  "config.configPath.description": "Path to the SSH config file to parse for host suggestions.",
+  "config.defaultRemotePath.description": "Remote folder opened by default on connection (\".\" = the remote user's home directory).",
+  "config.connectTimeout.description": "Maximum time to establish an SSH connection (ms).",
+  "config.keepaliveInterval.description": "Interval between keepalive packets sent to maintain the connection (ms, 0 to disable).",
+  "config.statCacheTtl.description": "How long file metadata (stat) is cached to reduce network round-trips (ms, 0 to disable)."
+}

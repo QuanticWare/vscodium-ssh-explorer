@@ -135,7 +135,11 @@ export class ConnectionManager {
         throw err;
       }
       const password = await vscode.window.showInputBox({
-        prompt: `Mot de passe SSH pour ${host.user ?? os.userInfo().username}@${host.alias}`,
+        prompt: vscode.l10n.t(
+          "SSH password for {0}@{1}",
+          host.user ?? os.userInfo().username,
+          host.alias
+        ),
         password: true,
         ignoreFocusOut: true,
       });
@@ -225,7 +229,7 @@ export class ConnectionManager {
       if (parsed instanceof Error) {
         if (/encrypted|passphrase/i.test(parsed.message)) {
           const passphrase = await vscode.window.showInputBox({
-            prompt: `Passphrase pour la clé ${file}`,
+            prompt: vscode.l10n.t("Passphrase for key {0}", file),
             password: true,
             ignoreFocusOut: true,
           });
