@@ -85,7 +85,7 @@ function resolveFromConfig(config: any, alias: string): SshHost | undefined {
   const user = firstValue(computed, "User");
   const portStr = firstValue(computed, "Port");
   const port = portStr ? parseInt(portStr, 10) : 22;
-  const identityFiles = allValues(computed, "IdentityFile").map(expandTilde);
+  const identityFiles = [...new Set(allValues(computed, "IdentityFile").map(expandTilde))];
   const proxyJump = firstValue(computed, "ProxyJump");
 
   return {
