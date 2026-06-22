@@ -2,7 +2,7 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "Ouvre l'arborescence d'un serveur distant via SSH/SFTP en se basant sur ~/.ssh/config. Aucun agent à installer côté serveur.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "anita",
   "license": "MIT",
   "repository": {
@@ -37,6 +37,11 @@
         "command": "sshExplorer.openFolder",
         "title": "SSH Explorer: Ouvrir un dossier distant",
         "icon": "$(folder-opened)"
+      },
+      {
+        "command": "sshExplorer.openParent",
+        "title": "SSH Explorer: Remonter au dossier parent",
+        "icon": "$(arrow-up)"
       },
       {
         "command": "sshExplorer.disconnect",
@@ -85,6 +90,13 @@
           "command": "sshExplorer.openFolder",
           "when": "view == sshExplorerHosts && viewItem == sshHost",
           "group": "inline"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "sshExplorer.openParent",
+          "when": "explorerResourceIsFolder && resourceScheme == ssh",
+          "group": "navigation@99"
         }
       ]
     },

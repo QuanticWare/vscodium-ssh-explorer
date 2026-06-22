@@ -53,10 +53,13 @@ export function activate(context: vscode.ExtensionContext): void {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("sshExplorer.connect", (alias?: string) =>
-      connectCommand(manager, settings, alias)
+      connectCommand(manager, settings, alias, "choose")
     ),
     vscode.commands.registerCommand("sshExplorer.openFolder", (alias?: string) =>
-      connectCommand(manager, settings, alias, true)
+      connectCommand(manager, settings, alias, "prompt")
+    ),
+    vscode.commands.registerCommand("sshExplorer.openParent", (uri?: vscode.Uri) =>
+      openParentCommand(uri)
     ),
     vscode.commands.registerCommand("sshExplorer.disconnect", () =>
       disconnectCommand(manager)
@@ -74,14 +77,18 @@ export async function deactivate(): Promise<void> {
 // --- Implémentation des commandes -----------------------------------------
 
 /**
- * Sélectionne un hôte (ou utilise `alias`), demande le dossier distant puis
- * l'ajoute comme dossier du workspace via une URI `ssh://`.
+ * Sélectionne un hôte (ou utilise `alias`), détermine le dossier distant de
+ * départ puis l'ajoute comme dossier du workspace via une URI `ssh://`.
+ *
+ * `mode` :
+ *  - "choose" : propose Dossier personnel / Racine du serveur / Chemin perso ;
+ *  - "prompt" : demande directement un chemin (champ libre).
  */
 async function connectCommand(
   manager: ConnectionManager,
   settings: ExtensionSettings,
   alias?: string,
-  askPath = false
+  mode: "choose" | "prompt" = "choose"
 ): Promise<void> {
   let target = alias;
   if (!target) {
@@ -107,17 +114,12 @@ async function connectCommand(
     target = pick.alias;
   }
 
-  let remotePath = settings.defaultRemotePath || ".";
-  if (askPath) {
-    const input = await vscode.window.showInputBox({
-      prompt: `Dossier distant à ouvrir sur ${target}`,
-      value: remotePath,
-      ignoreFocusOut: true,
-    });
-    if (input === undefined) {
-      return;
-    }
-    remotePath = input;
+  const remotePath =
+    mode === "prompt"
+      ? await promptRemotePath(target, settings.defaultRemotePath || ".")
+      : await pickStartPath(target, settings.defaultRemotePath || ".");
+  if (remotePath === undefined) {
+    return;
   }
 
   await vscode.window.withProgress(
@@ -156,7 +158,91 @@ async function disconnectCommand(manager: ConnectionManager): Promise<void> {
   vscode.workspace.updateWorkspaceFolders(pick.folder.index, 1);
 }
 
+/**
+ * Ajoute le dossier parent d'un dossier distant à l'espace de travail, ce qui
+ * permet de « remonter » dans l'arborescence du serveur (VS Code n'autorise pas
+ * la navigation au-dessus de la racine d'un dossier de workspace).
+ * `uri` est fourni lors d'un clic droit dans l'explorateur ; sinon on demande.
+ */
+async function openParentCommand(uri?: vscode.Uri): Promise<void> {
+  let folderUri = uri;
+  if (!folderUri || folderUri.scheme !== SCHEME) {
+    const folders = (vscode.workspace.workspaceFolders ?? []).filter(
+      (f) => f.uri.scheme === SCHEME
+    );
+    if (folders.length === 0) {
+      vscode.window.showInformationMessage("SSH Explorer: aucun dossier distant ouvert.");
+      return;
+    }
+    const pick = await vscode.window.showQuickPick(
+      folders.map((f) => ({ label: f.name, description: f.uri.toString(), uri: f.uri })),
+      { placeHolder: "Dossier distant dont ouvrir le parent" }
+    );
+    if (!pick) {
+      return;
+    }
+    folderUri = pick.uri;
+  }
+
+  const parent = parentOf(folderUri.path);
+  if (parent === folderUri.path) {
+    vscode.window.showInformationMessage(
+      `SSH Explorer: ${folderUri.authority} est déjà à la racine (/).`
+    );
+    return;
+  }
+  addWorkspaceFolder(folderUri.authority, parent);
+}
+
 // --- Utilitaires ----------------------------------------------------------
+
+/**
+ * Propose un point de départ : dossier personnel, racine du serveur (`/`) ou
+ * chemin saisi librement. Retourne le chemin choisi, ou `undefined` si annulé.
+ */
+async function pickStartPath(
+  alias: string,
+  homePath: string
+): Promise<string | undefined> {
+  const CUSTOM = "__custom__";
+  const choice = await vscode.window.showQuickPick(
+    [
+      { label: "$(home) Dossier personnel", description: homePath, value: homePath },
+      { label: "$(folder-library) Racine du serveur", description: "/", value: "/" },
+      { label: "$(edit) Chemin personnalisé…", description: "", value: CUSTOM },
+    ],
+    { placeHolder: `Quel dossier ouvrir sur ${alias} ?` }
+  );
+  if (!choice) {
+    return undefined;
+  }
+  if (choice.value === CUSTOM) {
+    return promptRemotePath(alias, homePath);
+  }
+  return choice.value;
+}
+
+/** Demande librement un chemin distant à ouvrir. */
+async function promptRemotePath(
+  alias: string,
+  defaultPath: string
+): Promise<string | undefined> {
+  return vscode.window.showInputBox({
+    prompt: `Dossier distant à ouvrir sur ${alias}`,
+    value: defaultPath,
+    ignoreFocusOut: true,
+  });
+}
+
+/** Calcule le dossier parent d'un chemin POSIX absolu (`/` reste `/`). */
+function parentOf(p: string): string {
+  const trimmed = p.replace(/\/+$/, "");
+  const idx = trimmed.lastIndexOf("/");
+  if (idx <= 0) {
+    return "/";
+  }
+  return trimmed.slice(0, idx);
+}
 
 /** Résout un chemin distant (éventuellement relatif comme ".") en absolu. */
 function realpath(sftp: SFTPWrapper, remotePath: string): Promise<string> {

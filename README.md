@@ -22,10 +22,22 @@ Aucun agent ni serveur à installer côté distant : un simple accès SSH suffit
 
 1. Ouvrir la palette de commandes (`Ctrl/Cmd+Shift+P`).
 2. Lancer **« SSH Explorer: Se connecter à un hôte »**.
-3. Choisir un hôte de votre `~/.ssh/config`, puis le dossier distant à ouvrir.
+3. Choisir un hôte de votre `~/.ssh/config`, puis le **point de départ** :
+   - **Dossier personnel** (`~`),
+   - **Racine du serveur** (`/`) — pour parcourir *toute* l'arborescence,
+   - **Chemin personnalisé…**.
 
 L'arborescence apparaît comme un dossier du workspace ; ouvrez/modifiez/créez vos
 fichiers normalement.
+
+### Parcourir tout le serveur
+
+VS Code/VSCodium ne permet pas de remonter au-dessus de la racine d'un dossier de
+workspace. Pour explorer l'ensemble du serveur :
+
+- ouvrez directement la **Racine du serveur (`/`)** à la connexion, **ou**
+- faites un **clic droit** sur un dossier distant → **« SSH Explorer: Remonter au
+  dossier parent »** pour ajouter son dossier parent.
 
 ## Paramètres
 
