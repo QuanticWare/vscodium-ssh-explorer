@@ -2,14 +2,14 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "%extension.description%",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "publisher": "fred-gb",
   "author": "Fred_GB",
   "license": "MIT",
   "icon": "resources/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://git.quanticware.com/quanticware/vscodium-ssh-explorer.git"
+    "url": "https://github.com/QuanticWare/vscodium-ssh-explorer.git"
   },
   "engines": {
     "vscode": "^1.75.0"
@@ -139,7 +139,8 @@
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "typecheck": "tsc --noEmit",
-    "package": "vsce package"
+    "package": "vsce package",
+    "publish:ovsx": "ovsx publish"
   },
   "dependencies": {
     "ssh-config": "^4.4.4",
@@ -151,6 +152,7 @@
     "@types/vscode": "^1.75.0",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.20.0",
+    "ovsx": "^0.9.0",
     "typescript": "^5.4.0"
   }
 }

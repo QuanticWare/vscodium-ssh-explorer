@@ -1,6 +1,6 @@
-> 🌐 **Langue :** **Français** · [English](https://git.quanticware.com/quanticware/vscodium-ssh-explorer/src/branch/main/README.md)
+> 🌐 **Langue :** **Français** · [English](https://github.com/QuanticWare/vscodium-ssh-explorer/blob/main/README.md)
 
-# SSH Explorer (VSCodium)
+# SSH Explorer
 
 Ouvre l'**arborescence d'un serveur distant** directement dans l'explorateur de
 VSCodium via **SSH/SFTP**, en se basant sur votre fichier **`~/.ssh/config`**.
@@ -215,3 +215,7 @@ npm run package        # génère le .vsix
 ## Licence
 
 MIT
+
+## Crédits
+
+Réalisée avec l'aide de [Claude Code](https://claude.com/claude-code) (Opus 4.8).
