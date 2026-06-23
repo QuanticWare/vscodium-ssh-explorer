@@ -2,7 +2,7 @@
   "name": "vscodium-ssh-explorer",
   "displayName": "SSH Explorer",
   "description": "%extension.description%",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "publisher": "quanticware",
   "author": "Fred_GB",
   "license": "MIT",

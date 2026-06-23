@@ -114,36 +114,36 @@ dédiée est présentée (l'agent SSH ne glisse pas une autre clé en premier).
 2. Point de départ : **Racine du serveur (`/`)**.
 3. Vous parcourez et éditez désormais **tout** le système de fichiers en `root`.
 
-### Exemple réel (hôte `myhost.example.com`)
+### Exemple complet
 
 ```sshconfig
 # Connexion interactive habituelle (non privilégiée)
-Host myhost.example.com
+Host monhote.example.com
   Hostname 203.0.113.10
-  User youruser
+  User votreuser
   Port 22
-  IdentityFile ~/.ssh/myhost_ed25519
+  IdentityFile ~/.ssh/monhote_ed25519
   RemoteCommand sudo -s
   RequestTTY yes
 
 # Accès SFTP élevé (root) — à placer AVANT "Host *"
-Host myhost.example.com-sftp
+Host monhote.example.com-sftp
   Hostname 203.0.113.10
-  User youruser
+  User votreuser
   Port 22
-  IdentityFile ~/.ssh/myhost_root_sftp_ed25519
+  IdentityFile ~/.ssh/monhote_root_sftp_ed25519
   IdentitiesOnly yes
   IdentityAgent none
   PreferredAuthentications publickey
 ```
 
-Entrée correspondante dans le `~/.ssh/authorized_keys` de `youruser` sur myhost :
+Entrée correspondante dans le `~/.ssh/authorized_keys` de `votreuser` sur monhote :
 
 ```
-restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  myhost-root-sftp
+restrict,command="sudo /usr/lib/openssh/sftp-server" ssh-ed25519 AAAA…  monhote-root-sftp
 ```
 
-Dans l'extension, connectez-vous à **`myhost.example.com-sftp`**, démarrez sur
+Dans l'extension, connectez-vous à **`monhote.example.com-sftp`**, démarrez sur
 `/`, et vous éditez les fichiers de `root` (ex. `/etc/...`).
 
 > 🚀 **Déploiement de flotte** : pour poser cette entrée `authorized_keys` (et la

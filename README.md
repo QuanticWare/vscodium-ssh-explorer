@@ -111,7 +111,7 @@ key is presented (the SSH agent won't slip another key in first).
 2. Starting point: **Server root (`/`)**.
 3. You now browse and edit the **whole** filesystem as `root`.
 
-### Real-world example (host `myhost.example.com`)
+### Worked example
 
 ```sshconfig
 # Usual interactive (unprivileged) login
